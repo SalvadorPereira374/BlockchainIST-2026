@@ -27,7 +27,7 @@ public class NodeMain {
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             server.shutdown();
-            sequencerChannel.shutdown(); // Desligar também o cabo do sequenciador!
+            sequencerChannel.shutdown();
         }));
         server.awaitTermination();   
     }
