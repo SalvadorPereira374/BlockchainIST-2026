@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
+import pt.tecnico.blockchainist.contract.*;
 
+import io.grpc.StatusRuntimeException;
 import pt.tecnico.blockchainist.client.grpc.ClientNodeService;
 
 public class CommandProcessor {
@@ -108,8 +110,21 @@ public class CommandProcessor {
         Integer nodeIndex = Integer.parseInt(split[3]);
         Integer nodeDelay = Integer.parseInt(split[4]);
 
-        // TODO
-        System.out.println("TODO: createWallet(" + userId + ", " + walletId + ")");
+        ClientNodeService Node = this.nodes.get(nodeIndex);
+        CreateWalletRequest request = CreateWalletRequest.newBuilder()
+        .setUserId(userId).setWalletId(walletId).build();
+        try{
+            if (isBlocking){
+                Node.createWallet(request);
+                System.out.println("OK "+ commandNumber);
+            }else{
+                System.out.println("Error");
+            }
+        }catch(StatusRuntimeException e){
+            System.out.println("Caught exception with description: " +
+                   e.getStatus().getDescription());
+        }
+        
     }
 
     private void delete(String[] split, boolean isBlocking) {
@@ -122,8 +137,20 @@ public class CommandProcessor {
         Integer nodeIndex = Integer.parseInt(split[3]);
         Integer nodeDelay = Integer.parseInt(split[4]);
 
-        // TODO
-        System.out.println("TODO: deleteWallet(" + userId + ", " + walletId + ")");
+        ClientNodeService Node = this.nodes.get(nodeIndex);
+        DeleteWalletRequest request = DeleteWalletRequest.newBuilder()
+        .setUserId(userId).setWalletId(walletId).build();
+        try{
+            if (isBlocking){
+                Node.deleteWallet(request);
+                System.out.println("OK "+ commandNumber);
+            }else{
+                System.out.println("Error");
+            }
+        }catch(StatusRuntimeException e){
+            System.out.println("Caught exception with description: " +
+                   e.getStatus().getDescription());
+        }
     }
 
     private void balance(String[] split, boolean isBlocking) {
@@ -135,8 +162,20 @@ public class CommandProcessor {
         Integer nodeIndex = Integer.parseInt(split[2]);
         Integer nodeDelay = Integer.parseInt(split[3]);
 
-        // TODO
-        System.out.println("TODO: readBalance(" + walletId + ")");
+        ClientNodeService Node = this.nodes.get(nodeIndex);
+        ReadBalanceRequest request = ReadBalanceRequest.newBuilder().setWalletId(walletId).build();
+        try{
+            if (isBlocking){
+                ReadBalanceResponse response = Node.readBalance(request);
+                System.out.println("OK "+ commandNumber);
+                System.out.println(response.getBalance());
+            }else{
+                System.out.println("Error");
+            }
+        }catch(StatusRuntimeException e){
+            System.out.println("Caught exception with description: " +
+                   e.getStatus().getDescription());
+        }
     }
 
     private void transfer(String[] split, boolean isBlocking) {
@@ -150,9 +189,24 @@ public class CommandProcessor {
         Long amount = Long.parseLong(split[4]);
         Integer nodeIndex = Integer.parseInt(split[5]);
         Integer nodeDelay = Integer.parseInt(split[6]);
-
-        // TODO
-        System.out.println("TODO: transfer(" + sourceUserId + ", " + sourceWalletId + ", " + destinationWalletId + ", " + amount + ")");
+        ClientNodeService Node = this.nodes.get(nodeIndex);
+        
+        TransferRequest request = TransferRequest.newBuilder()
+        .setSrcUserId(sourceUserId).setSrcWalletId(sourceWalletId)
+        .setDstWalletId(destinationWalletId)
+        .setValue(amount).build();
+        try{
+            if (isBlocking){
+                Node.transfer(request);
+                System.out.println("OK "+ commandNumber);
+            }else{
+                System.out.println("Error");
+            }
+        }catch(StatusRuntimeException e){
+            System.out.println("Caught exception with description: " +
+                   e.getStatus().getDescription());
+        }
+        
     }
 
     private void debugBlockchainState(String[] split) {
@@ -161,9 +215,16 @@ public class CommandProcessor {
         Long commandNumber = this.commandCounter.incrementAndGet();
 
         Integer nodeIndex = Integer.parseInt(split[1]);
-
-        // TODO
-        System.out.println("TODO: getBlockchainState(" + nodeIndex + ")");
+        ClientNodeService Node = this.nodes.get(nodeIndex);
+        GetBlockchainStateRequest request = GetBlockchainStateRequest.newBuilder().build();
+        try{
+            GetBlockchainStateResponse response = Node.getBlockchainState(request);
+            System.out.println("OK " + commandNumber);
+            System.out.println(response.toString());
+        }catch(StatusRuntimeException e){
+            System.out.println("Caught exception with description: " +
+                   e.getStatus().getDescription());
+        }
     }
 
     private void pause(String[] split) {
